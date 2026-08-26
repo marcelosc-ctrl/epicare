@@ -145,27 +145,34 @@
           </div>
         </div>
 
-        <!-- CARD 3: MANIFESTAÇÕES DOMINANTES (ILAE 2025) -->
+        <!-- CARD 3: MANIFESTAÇÕES DOMINANTES -->
         <div class="bg-slate-800/80 rounded-2xl p-3.5 border border-slate-700/60 shadow-sm">
-          <div class="flex items-center justify-between mb-2.5">
+          <div class="flex items-center justify-between mb-2">
             <span class="text-xs font-semibold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
               <i class="fa-solid fa-3 text-[10px] bg-indigo-950 p-1 rounded-full w-4 h-4 text-center"></i> 
-              Manifestações Semiológicas
+              Manifestações Semiológicas Completa (ILAE)
             </span>
+            <span class="text-[10px] text-emerald-400 font-medium bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-800/40" id="sintomas-count-badge">0 sel.</span>
           </div>
 
           <!-- Alternador de Categoria de Sinais -->
-          <div class="flex bg-slate-900/90 p-1 rounded-xl mb-3 border border-slate-700/50">
+          <div class="flex bg-slate-900/90 p-1 rounded-xl mb-2.5 border border-slate-700/50">
             <button onclick="setCategoriaManifestacao('observavel')" id="tab-cat-observavel" class="flex-1 py-1.5 text-xs font-medium rounded-lg text-white bg-indigo-600 transition shadow">
-              Observáveis
+              Observáveis (Visíveis)
             </button>
             <button onclick="setCategoriaManifestacao('nao_observavel')" id="tab-cat-nao_observavel" class="flex-1 py-1.5 text-xs font-medium rounded-lg text-slate-400 hover:text-white transition">
               Não Observáveis (Auras)
             </button>
           </div>
 
+          <!-- Campo de Busca Rápida -->
+          <div class="relative mb-2.5">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+            <input type="text" id="buscaSintoma" oninput="renderizarManifestacoes()" placeholder="Busca rápida (ex: mastigação, esgrima, medo, déjà-vu)..." class="w-full bg-slate-900 text-slate-100 text-xs rounded-xl pl-8 pr-3 py-1.5 border border-slate-700 focus:border-indigo-500 focus:outline-none">
+          </div>
+
           <!-- Lista de Seleção de Sintomas (Chips) -->
-          <div id="container-manifestacoes" class="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto p-1">
+          <div id="container-manifestacoes" class="flex flex-wrap gap-1.5 max-h-56 overflow-y-auto p-1">
             <!-- Injetado via JS -->
           </div>
         </div>
@@ -184,7 +191,7 @@
             <span class="text-xs font-bold text-indigo-300 uppercase tracking-wider flex items-center gap-1.5">
               <i class="fa-solid fa-map-pin text-indigo-400"></i> Localização Semiológica Sugerida
             </span>
-            <span id="probabilidade-badge" class="text-[10px] bg-indigo-900/80 text-indigo-200 px-2 py-0.5 rounded-full border border-indigo-700/50">Calculando...</span>
+            <span id="probabilidade-badge" class="text-[10px] bg-indigo-900/80 text-indigo-200 px-2 py-0.5 rounded-full border border-indigo-700/50">Análise Dinâmica</span>
           </div>
 
           <div id="painel-localizacao-sugerida" class="text-xs text-slate-200 font-medium bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
@@ -274,7 +281,7 @@
             </div>
             <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
               <span class="font-bold text-slate-200 block">4. Metabólica</span>
-              <span class="text-[10px] text-slate-400 block mt-0.5">Eros inatos, Piridoxina, Glut1</span>
+              <span class="text-[10px] text-slate-400 block mt-0.5">Erros inatos, Piridoxina, Glut1</span>
             </div>
             <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
               <span class="font-bold text-slate-200 block">5. Imune</span>
@@ -330,7 +337,7 @@
         </div>
 
         <div id="textoLaudoModal" class="bg-slate-950 text-slate-300 font-mono text-xs p-3 rounded-xl border border-slate-800 whitespace-pre-wrap leading-relaxed overflow-y-auto flex-1 select-all">
-          Generating...
+          Gerando...
         </div>
 
         <div class="flex gap-2">
@@ -384,153 +391,329 @@
       descricaoTextual: ''
     };
 
-    // BANCO DE DADOS DE MANIFESTAÇÕES
+    // BANCO DE DADOS EXAUSTIVO DE MANIFESTAÇÕES (ILAE 2025 & EPILEPSYDIAGNOSIS.ORG)
     const manifestacoesDB = {
       observavel: [
-        { id: 'automatismos', nome: 'Automatismos', lobo: 'Temporal / Frontal', icone: 'fa-hand-sparkles' },
-        { id: 'atonio', nome: 'Atonia / Perda de Tônus', lobo: 'Frontal / Parietal', icone: 'fa-person-falling' },
+        // Motoras Elementares
         { id: 'clonica', nome: 'Clônica', lobo: 'Frontal (Córtex Motor)', icone: 'fa-wave-square' },
-        { id: 'espasmos', nome: 'Espasmos Epilépticos', lobo: 'Generalizado / Redes Difusas', icone: 'fa-bolt' },
-        { id: 'hipercinetica', nome: 'Hipercinética (Pedalagem/Pelvina)', lobo: 'Frontal Ventromedial', icone: 'fa-person-running' },
-        { id: 'mioclonica', nome: 'Mioclonias Positivas', lobo: 'Córtex Motor / Generalizado', icone: 'fa-bolt-lightning' },
-        { id: 'mioclonia_negativa', nome: 'Mioclonia Negativa Epiléptica', lobo: 'Frontal / Parietal Motor', icone: 'fa-hand-back-fist' },
         { id: 'tonica', nome: 'Tônica', lobo: 'Frontal / Generalizado', icone: 'fa-child-reaching' },
-        { id: 'versiva', nome: 'Versão Cefálica/Ocular', lobo: 'Frontal Contralateral (FEF)', icone: 'fa-head-side-virus' },
-        { id: 'parada_comportamento', nome: 'Parada Comportamental', lobo: 'Temporal / Frontal', icone: 'fa-pause' },
-        { id: 'autonomica_obs', nome: 'Sinais Autonômicos (Piloereção/Rubor)', lobo: 'Ínsula / Temporal', icone: 'fa-heart-pulse' }
+        { id: 'tonico_clonica', nome: 'Tônico-Clônica', lobo: 'Generalizado / Focal com Progressão', icone: 'fa-bolt' },
+        { id: 'mioclonica', nome: 'Mioclonia (Positiva)', lobo: 'Córtex Motor / Generalizado', icone: 'fa-bolt-lightning' },
+        { id: 'mioclonia_negativa', nome: 'Mioclonia Negativa Epiléptica', lobo: 'Frontal / Parietal Motor', icone: 'fa-hand-back-fist' },
+        { id: 'mioclonia_palpebral', nome: 'Mioclonia Palpebral (Síndrome de Jeavons)', lobo: 'Generalizado (Occipito-Frontal)', icone: 'fa-eye' },
+        { id: 'atonio', nome: 'Atonia / Perda de Tônus (Drop Attack)', lobo: 'Frontal / Parietal', icone: 'fa-person-falling' },
+        { id: 'espasmos', nome: 'Espasmos Epilépticos', lobo: 'Redes Difusas / Subcorticais', icone: 'fa-child' },
+        
+        // Sinais Posturais & Direcionais
+        { id: 'versiva', nome: 'Versão Cefálica/Ocular (Desvio Forçado)', lobo: 'Frontal Contralateral (FEF)', icone: 'fa-head-side-virus' },
+        { id: 'postura_fencistica', nome: 'Postura Fencística / Em Esgrima', lobo: 'Área Motora Suplementar (SMA)', icone: 'fa-person-rays' },
+        { id: 'distonia_unilateral', nome: 'Postura Distônica Unilateral', lobo: 'Temporal Medial / Gânglios da Base (Contralateral)', icone: 'fa-hand-dots' },
+        { id: 'spinning', nome: 'Rotação do Corpo (Spinning Ictal)', lobo: 'Frontal / Temporal', icone: 'fa-arrows-spin' },
+
+        // Automatismos (Motoras Complexas)
+        { id: 'automatismos_oromanuais', nome: 'Automatismos Oromanuais (Mastigação/Deglutição)', lobo: 'Temporal Medial / Amígdala', icone: 'fa-utensils' },
+        { id: 'automatismos_gestuais', nome: 'Automatismos Manuais/Gestuais (Mexer em Roupas)', lobo: 'Temporal Medial / Frontal', icone: 'fa-hand-sparkles' },
+        { id: 'automatismos_ambulatorios', nome: 'Automatismos Ambulatórios (Deambulação)', lobo: 'Frontal / Temporal', icone: 'fa-person-walking' },
+        { id: 'hipercinetica', nome: 'Hipercinética (Pedalagem / Pelvina)', lobo: 'Frontal Ventromedial', icone: 'fa-person-running' },
+        { id: 'automatismos_verbais', nome: 'Vocalizações / Automatismos Verbais', lobo: 'Temporal Não Dominante / Frontal', icone: 'fa-comment-dots' },
+
+        // Parada Comportamental & Autonômicos Observáveis
+        { id: 'parada_comportamento', nome: 'Parada Comportamental (Behavioral Arrest)', lobo: 'Temporal / Frontal', icone: 'fa-pause' },
+        { id: 'autonomica_obs', nome: 'Rubor / Palidez / Piloereção Visível', lobo: 'Ínsula / Temporal', icone: 'fa-heart-pulse' },
+        { id: 'sialorreia', nome: 'Sialorreia / Salivação Abundante', lobo: 'Opercular / Ínsula', icone: 'fa-droplet' },
+        { id: 'midriase', nome: 'Midríase / Alteração Pupilar Ictal', lobo: 'Autonômico Central / Ínsula', icone: 'fa-circle-dot' }
       ],
       nao_observavel: [
+        // Auras Somatosensoriais & Epigástricas
         { id: 'aura_epigastrica', nome: 'Aura Epigástrica Ascendente', lobo: 'Temporal Medial / Ínsula', icone: 'fa-arrow-up-short-wide' },
-        { id: 'aura_cognitiva', nome: 'Déjà-vu / Jamais-vu / Disfasia', lobo: 'Temporal Neocortical', icone: 'fa-brain' },
-        { id: 'aura_emocional', nome: 'Medo Iminente / Ansiedade Súbita', lobo: 'Amígda / Temporal Medial', icone: 'fa-face-flushed' },
-        { id: 'aura_sensorial', nome: 'Parestesias / Somatossensorial', lobo: 'Parietal (Giro Pós-Central)', icone: 'fa-hand' },
-        { id: 'aura_visual', nome: 'Fosfenos / Alucinação Visual', lobo: 'Occipital', icone: 'fa-eye' },
-        { id: 'aura_auditiva', nome: 'Zumbido / Alucinação Auditiva', lobo: 'Temporal Superior (Heschl)', icone: 'fa-ear-listen' },
-        { id: 'aura_olfativa_gustativa', nome: 'Cacosmia / Gosto Metálico', lobo: 'Uncus Temporal / Ínsula', icone: 'fa-lemon' },
-        { id: 'aura_tontura', nome: 'Sensação Vertiginosa Epiléptica', lobo: 'Parieto-Temporal', icone: 'fa-arrows-spin' }
+        { id: 'aura_sensorial', nome: 'Aura Somatossensorial (Parestesias / Formigamento)', lobo: 'Parietal (Giro Pós-Central)', icone: 'fa-hand' },
+        { id: 'aura_termica', nome: 'Aura Térmica (Frio / Calor Intenso Localizado)', lobo: 'Parietal / Ínsula', icone: 'fa-temperature-high' },
+        { id: 'aura_dolorosa', nome: 'Aura Dolorosa (Dor Focal Epiléptica)', lobo: 'Parietal II / Ínsula', icone: 'fa-file-waveform' },
+
+        // Auras Psíquicas & Cognitivas
+        { id: 'aura_cognitiva', nome: 'Déjà-vu / Jamais-vu / Sensação de Estranheza', lobo: 'Temporal Neocortical', icone: 'fa-brain' },
+        { id: 'aura_emocional', nome: 'Medo Iminente / Pânico Súdito / Ansiedade', lobo: 'Amígdala / Temporal Medial', icone: 'fa-face-flushed' },
+        { id: 'afasia_ictal', nome: 'Disfasia / Afasia Ictal (Prejuízo de Linguagem)', lobo: 'Temporal Dominante (Wernicke/Broca)', icone: 'fa-language' },
+
+        // Auras Sensoriais Especiais (Órgãos dos Sentidos)
+        { id: 'aura_visual_simples', nome: 'Aura Visual Simples (Fosfenos / Pontos Luminosos)', lobo: 'Occipital (Córtex Estriado)', icone: 'fa-eye' },
+        { id: 'aura_visual_complexa', nome: 'Aura Visual Complexa (Alucinações Formadas / Micropsia)', lobo: 'Temporo-Occipital', icone: 'fa-icons' },
+        { id: 'aura_auditiva', nome: 'Aura Auditiva (Zumbidos / Vozes / Sons Distorcidos)', lobo: 'Temporal Superior (Giro de Heschl)', icone: 'fa-ear-listen' },
+        { id: 'aura_olfativa', nome: 'Aura Olfativa (Cacosmia / Cheiro de Queimado)', lobo: 'Uncus Temporal Medial', icone: 'fa-wind' },
+        { id: 'aura_gustativa', nome: 'Aura Gustativa (Gosto Metálico / Azedo)', lobo: 'Ínsula / Opercular Frontoparietal', icone: 'fa-lemon' },
+        { id: 'aura_tontura', nome: 'Sensação Vertiginosa / Vestibular', lobo: 'Parieto-Temporal / Ínsula', icone: 'fa-arrows-spin' },
+        { id: 'aura_autonomica_subjetiva', nome: 'Palpitação Interna / Frio no Estômago', lobo: 'Ínsula / Sistema Límbico', icone: 'fa-heart-crack' }
       ]
     };
 
-    // BANCO DE DADOS DE SÍNDROMES (EPILEPSYDIAGNOSIS.ORG)
+    // BANCO DE DADOS COMPLETO DE SÍNDROMES ETIOLÓGICAS E ELETROCLÍNICAS (EPILEPSYDIAGNOSIS.ORG & ILAE)
     const sindromesDB = [
       {
-        id: 'sve',
-        nome: 'Síndrome de West (Espasmos Infantis)',
-        faixa: 'lactente',
-        idade: '3 - 12 meses',
-        clinica: 'Tríade: Espasmos epilépticos em flexão/extensão, atraso no DNPM e EEG característico.',
-        eeg: 'Hipsarritmia (padrão caótico, desorganizado, de alta voltagem com pontas multifocais).',
-        fármacosIndicados: ['Vigabatrina (escolha na Esclerose Tuberosa)', 'ACTH / Corticoides'],
-        fármacosContraindicados: ['Carbamazepina', 'Oxcarbazepina (podem agravar)']
+        nome: "Síndrome de West (Espasmos Infantis / Encefalopatia Epiléptica)",
+        faixa: "lactente",
+        idade: "3 a 12 meses (pico 4-7 meses)",
+        clinica: "Tríade clássica: espasmos epilépticos em salva (em flexão, extensão ou mistos), atraso ou regressão do desenvolvimento neuropsicomotor e hipsarritmia no EEG.",
+        eeg: "Hipsarritmia (ondas lentas de alta voltagem desorganizadas, caóticas e pontas multifocais assíncronas).",
+        fármacosIndicados: ["Vigabatrina (primeira escolha se Esclerose Tuberosa)", "ACTH / Corticotropina", "Corticosteroides (Prednisolona)"],
+        fármacosContraindicados: ["Carbamazepina", "Oxcarbazepina", "Fenitoína (podem agravar espasmos)"]
       },
       {
-        id: 'lennox',
-        nome: 'Síndrome de Lennox-Gastaut (SLG)',
-        faixa: 'infancia',
-        idade: '2 - 8 anos',
-        clinica: 'Múltiplos tipos de crises (tônicas noturnas, atônicas/drop-attacks, ausências atípicas), prejuízo cognitivo.',
-        eeg: 'Ponta-onda lenta interictal (< 2.5 Hz) difusa e Surtos de Ritmo Rápido Paroxístico Noturno (GPFA).',
-        fármacosIndicados: ['Valproato', 'Clobazam', 'Lamotrigina', 'Rufinamida', 'Cannabidiol'],
-        fármacosContraindicados: ['Carbamazepina', 'Phenitoína (pode piorar ausências e mioclonias)']
+        nome: "Epilepsia Mioclónica do Lactente (EML / Dravet Precoce)",
+        faixa: "lactente",
+        idade: "6 a 18 meses",
+        clinica: "Mioclonias breves recorrentes envolvendo tronco e membros, podendo causar quedas súbitas da cabeça ou corpo em lactentes previamente hígidos.",
+        eeg: "Atividade de fundo normal com surtos de poliponta-onda generalizada e ponta-onda rápida síncronas com as mioclonias.",
+        fármacosIndicados: ["Valproato de Sódio", "Clobazam", "Levetiracetam"],
+        fármacosContraindicados: ["Carbamazepina", "Oxcarbazepina", "Lamotrigina (em doses altas)"]
       },
       {
-        id: 'ausencia_infantil',
-        nome: 'Epilepsia Ausência Infantil (EAI)',
-        faixa: 'infancia',
-        idade: '4 - 10 anos',
-        clinica: 'Ausências típicas frequentes (dezenas por dia), induzidas por hiperventilação. Desenvolvimento normal.',
-        eeg: 'Complexos de ponta-onda quadrada síncrona e simétrica a 3 Hz com início e fim abruptos.',
-        fármacosIndicados: ['Etossuximida (primeira escolha)', 'Valproato de Sódio', 'Lamotrigina'],
-        fármacosContraindicados: ['Carbamazepina', 'Oxcarbazepina', 'Vigabatrina', 'Tiagabina']
+        nome: "Síndrome de Dravet (Epilepsia Mioclónica Grave da Infância)",
+        faixa: "lactente",
+        idade: "6 a 12 meses",
+        clinica: "Início com crises febris prolongadas ou estado de mal epiléptico focal/clônico unilateral. Evolui para crises mioclônicas, atípicas e focal no 2º ano de vida com estagnação cognitiva. Mutação SCN1A (>80%).",
+        eeg: "Início normal; posteriormente lentificação focal ou difusa, poliponta-onda acentuada por estimulação luminosa.",
+        fármacosIndicados: ["Valproato de Sódio", "Clobazam", "Stiripentol", "Cannabidiol", "Fenfluramina"],
+        fármacosContraindicados: ["Bloqueadores de Canal de Sódio (Carbamazepina, Oxcarbazepina, Fenitoína, Lamotrigina)"]
       },
       {
-        id: 'ejm',
-        nome: 'Epilepsia Mioclônica Juvenil (EMJ - Janz)',
-        faixa: 'adolescencia',
-        idade: '12 - 18 anos',
-        clinica: 'Abalos mioclônicos matinais ao despertar (arremessar objetos), crises tônico-clônicas disparadas por privação de sono/álcool.',
-        eeg: 'Poliponta-onda rápida (4-6 Hz) generalizada com fotoparoxismo.',
-        fármacosIndicados: ['Valproato', 'Levetiracetam', 'Lamotrigina', 'Topiramato'],
-        fármacosContraindicados: ['Carbamazepina', 'Oxcarbazepina', 'Phenitoína (podem exacerbar acentuadamente as mioclonias)']
+        nome: "Epilepsia da Infância com Pontas Centrotemporais (Rolândica / SeLECTS)",
+        faixa: "infancia",
+        idade: "3 a 12 anos (pico 6-8 anos)",
+        clinica: "Crises focais motoras ou somatossensoriais faciais e orofaríngeas, parestesias em hemilíngua, sialorreia, anartria durante o sono ou ao despertar. Cognição preservada. Autolimitada.",
+        eeg: "Pontas centrotemporais de alta voltagem (ondas rolandicas) ativadas acentuadamente pelo sono NREM.",
+        fármacosIndicados: ["Tratamento muitas vezes desnecessário", "Levetiracetam", "Sulthiame", "Valproato"],
+        fármacosContraindicados: ["Carbamazepina em doses altas (pode induzir mioclonias/espasmos de onda contínua no sono)"]
       },
       {
-        id: 'dravet',
-        nome: 'Síndrome de Dravet (SCN1A)',
-        faixa: 'lactente',
-        idade: '< 1 ano (início aos 6 meses)',
-        clinica: 'Crises febris prolongadas/estado de mal febril hemicorporal, mioclonias subsequentes, fotossensibilidade e declínio cognitivo.',
-        eeg: 'Inicialmente normal; mais tarde lentificação multifocal e polipontas.',
-        fármacosIndicados: ['Stiripentol', 'Clobazam', 'Valproato', 'Fenfluramina', 'Dieta Cetogênica'],
-        fármacosContraindicados: ['Bloqueadores de Canal de Sódio (Carbamazepina, Oxcarbazepina, Lamotrigina, Phenitoína)']
+        nome: "Epilepsia Ausência Infantil (EAI / CAE)",
+        faixa: "infancia",
+        idade: "4 a 10 anos (pico 5-7 anos)",
+        clinica: "Ausências típicas frequentes (dezenas por dia), com parada súbita da atividade e olhar vago (5 a 10s), hiperventilação como gatilho clássico. Excelente prognóstico.",
+        eeg: "Complexos ponta-onda lenta generalizados, síncronos e simétricos de 3 Hz em fundo normal.",
+        fármacosIndicados: ["Etossuximida (1ª escolha)", "Valproato de Sódio", "Lamotrigina"],
+        fármacosContraindicados: ["Carbamazepina", "Oxcarbazepina", "Fenitoína", "Vigabatrina", "Tiagabina"]
+      },
+      {
+        nome: "Síndrome de Lennox-Gastaut (SLG)",
+        faixa: "infancia",
+        idade: "2 a 8 anos",
+        clinica: "Tríade: múltiplos tipos de crises refratárias (músculo-tônicas noturnas, atônicas/drop-attacks, ausências atípicas), prejuízo cognitivo progressivo e achado característico no EEG.",
+        eeg: "Complexos ponta-onda lenta interictal generalizada (< 2.5 Hz) e Surtos de Atividade Rápida Paroxística (GPFA) no sono.",
+        fármacosIndicados: ["Valproato", "Clobazam", "Lamotrigina", "Rufinamida", "Felbamato", "Cannabidiol"],
+        fármacosContraindicados: ["Carbamazepina", "Oxcarbazepina", "Phenytoin (podem piorar atonia e ausências)"]
+      },
+      {
+        nome: "Epilepsia Mioclónica Juvenil (EMJ / Síndrome de Janz)",
+        faixa: "adolescencia",
+        idade: "12 a 18 anos",
+        clinica: "Abalos mioclônicos matinais predominantemente em membros superiores ao despertar (soltar objetos), crises tônico-clônicas generalizadas (deflagradas por privação de sono/álcool) e ausências em 30%.",
+        eeg: "Paroxismos de poliponta-onda generalizada rápida (4 a 6 Hz) e foto-paroxística.",
+        fármacosIndicados: ["Valproato de Sódio", "Levetiracetam", "Lamotrigina", "Topiramato"],
+        fármacosContraindicados: ["Carbamazepina", "Oxcarbazepina", "Fenitoína", "Pregabalina", "Vigabatrina"]
+      },
+      {
+        nome: "Epilepsia com Crises Tônico-Clônicas Generalizadas Sozinhas (GTC-Alone)",
+        faixa: "adolescencia",
+        idade: "10 a 20 anos",
+        clinica: "Crises tônico-clônicas generalizadas puras, tipicamente ao despertar ou durante momentos de relaxamento após estresse ou privação de sono. Sem mioclonias antecedendo.",
+        eeg: "Atividade de fundo normal com surtos de ponta-onda e poliponta-onda generalizados simétricos.",
+        fármacosIndicados: ["Valproato de Sódio", "Lamotrigina", "Levetiracetam", "Topiramato"],
+        fármacosContraindicados: ["Carbamazepina (usar com cautela por risco de precipitar ausências/mioclonias ocultas)"]
+      },
+      {
+        nome: "Epilepsia Temporal Medial com Esclerose Hipocampal (ETM-EH)",
+        faixa: "adolescencia",
+        idade: "Adolescentes e Adultos Jóvens",
+        clinica: "História frequente de crise febril na infância. Início com aura epigástrica ascendente ou aura psíquica (déjà-vu), parada comportamental, automatismos oromanuais/gestuais e postura distônica contralateral.",
+        eeg: "PONTAS temporais anteriores/médias unilat. ou bilat. (F7/T3 ou F8/T4). RM 3T demonstra atrofia e hipersinal em T2/FLAIR no hipocampo.",
+        fármacosIndicados: ["Carbamazepina", "Oxcarbazepina", "Lamotrigina", "Levetiracetam", "Avaliação de Cirurgia de Epilepsia"],
+        fármacosContraindicados: ["Evitar atrasar a avaliação cirúrgica pré-operatória na refratariedade farmacológica."]
       }
     ];
 
-    // GLOSSÁRIO ILAE 2025
+    // BANCO DE DADOS DO GLOSSÁRIO SEMIOLÓGICO OPERACIONAL (ILAE 2025)
     const glossarioDB = [
-      { termo: 'Automatismos', def: 'Atividade motora involuntária, semieficiente ou desordenada, que ocorre durante o comprometimento da consciência (ex: mastigação, mexer nas roupas, marchar).' },
-      { termo: 'Atonia', def: 'Perda súbita e involuntária do tônus muscular pós-postural levando à queda de membros ou do corpo (drop attack).' },
-      { termo: 'Mioclonia Negativa Epiléptica', def: 'Interrupção breve e involuntária da contração muscular ativa, durando < 500ms, causando queda da postura da mão/membro sem evidência de EMG antecedente positiva.' },
-      { termo: 'Versão Cefálica', def: 'Desvio forçado, não natural e sustentado da cabeça e/ou olhos para um dos lados, indicando descarga no Lobo Frontal Contralateral (Campo Ocular Frontal).' },
-      { termo: 'Parada Comportamental', def: 'Cessação abrupta de todas as atividades motoras e imobilidade completa com olhar fixo durante o evento epiléptico.' }
+      {
+        termo: "Aura Epiléptica",
+        def: "Fenômeno ictal subjetivo, sensorial ou psíquico, percebido isoladamente pelo paciente no início da crise antes de qualquer manifestação motora ou alteração da consciência perceptível externamente."
+      },
+      {
+        termo: "Automatismos",
+        def: "Atividade motora involuntária mais ou menos coordenada, adaptativa ou repetitiva que ocorre durante uma crise com alteração de consciência ou amnésia subsequente (ex: mastigação, abotoar roupas, caminhar)."
+      },
+      {
+        termo: "Parada Comportamental (Behavioral Arrest)",
+        def: "Cessação súbita de toda atividade motora, fala e reatividade ambiental com imobilidade e olhar fixo durante o evento ictal."
+      },
+      {
+        termo: "Mioclonia Epiléptica (Positiva)",
+        def: "Contração muscular involuntária súbita, breve (< 100 ms) e em choque, única ou repetida, gerada por descarga cortical epiléptica."
+      },
+      {
+        termo: "Mioclonia Negativa Epiléptica",
+        def: "Interrupção brevíssima involuntária (< 500 ms) do tônus muscular sustentado, induzida por descarga epiléptica cortical no EEG, sem evidência de atonia prolongada ou perda postural grave."
+      },
+      {
+        termo: "Mioclonia Palpebral",
+        def: "Abalos mioclônicos breves e rítmicos das pálpebras, frequentemente acompanhados de desvio ocular superior, ativados por fechamento ocular ou estimulação luminosa (ex: Síndrome de Jeavons)."
+      },
+      {
+        termo: "Crise Tônica",
+        def: "Aumento sustentado do tônus e contração muscular mantida (de segundos a minutos), podendo envolver musculatura axial, rizomélica ou de membros."
+      },
+      {
+        termo: "Crise Clônica",
+        def: "Abalos musculares repetitivos, rítmicos, de mesma amplitude e frequência, envolvendo de forma síncrona o mesmo grupo muscular."
+      },
+      {
+        termo: "Crise Tônico-Clônica Bilateral",
+        def: "Sequência de fase tônica inicial (rigidez e apneia) seguida de fase clônica rítmica generalizada, frequentemente seguida de fase pós-ictal com estupor e estertor respiratório (substitui o antigo termo 'Grande Mal')."
+      },
+      {
+        termo: "Atonia / Crise Atônica",
+        def: "Perda súbita do tônus muscular sem evento mioclônico ou tônico antecedente, durando < 2 segundos e envolvendo cabeça, tronco ou membros, podendo ocasionar queda abrupta (Drop Attack)."
+      },
+      {
+        termo: "Espasmos Epilépticos",
+        def: "Flexão, extensão ou reação mista súbita e breve (0,5 a 2 segundos) da musculatura proximal e do tronco, tipicamente ocorrendo em salvas (clusters), característica da Síndrome de West e de encefalopatias epilépticas."
+      },
+      {
+        termo: "Versão Cefálica / Ocular",
+        def: "Desvio tônico sustentado e forçado da cabeça e/ou dos olhos para um lado, acompanhado de rotação do tronco, indicando habitualmente ativação do córtex motor frontal contralateral (Campo Ocular Frontal - FEF)."
+      },
+      {
+        termo: "Postura Fencística (Em Esgrima)",
+        def: "Extensão e elevação de um membro superior acompanhada de flexão do membro contralateral com desvio ocular para a mão estendida, altamente indicativo de zona epileptogênica na Área Motora Suplementar (SMA)."
+      },
+      {
+        termo: "Postura Distônica Unilateral",
+        def: "Contração muscular sustentada adotando atitude não natural (torção/flexão) de uma das extremidades superiores durante crise focal, apontando para envolvimento dos gânglios da base contralaterais e origem temporal medial."
+      },
+      {
+        termo: "Crise Hipercinética",
+        def: "Movimentos motores complexos, vigorosos e desorganizados de grande amplitude (como pedalagem, balanço pélvico, esperneio ou agitação violenta), típicos de crises com origem no Lobo Frontal (ventromedial/orbitofrontal)."
+      },
+      {
+        termo: "Crise Gelástica / Dacrística",
+        def: "Manifestação ictal involuntária caracterizada por riso inadequado sem conteúdo afetivo de alegria (Gelástica - patognomônica de Hamartoma Hipotalâmico) ou choro/lamento ictal (Dacrística)."
+      },
+      {
+        termo: "Aura Somatossensorial",
+        def: "Sensação parestésica (formigamento, dormência, sensação de choque ou agulhada) restrita a um segmento corporal, correlacionada à ativação do Giro Pós-Central (Córtex Somatossensorial Primário) no Lobo Parietal contralateral."
+      },
+      {
+        termo: "Aura Epigástrica Ascendente",
+        def: "Sensação desconfortável ou mal definida no epigástrio que sobe em direção ao tórax e garganta, sendo o sintoma inicial clássico da Epilepsia Temporal Medial / Sistema Límbico."
+      },
+      {
+        termo: "Aura Psíquica / Cognitiva / Emocional",
+        def: "Alterações de memória ou percepção interna: Déjà-vu (sensação de falsa familiaridade), Jamais-vu (sensação de estranheza do familiar), medo/pânico ictal repentino não provocado (origem na Amígdala) ou estados ilusórios."
+      },
+      {
+        termo: "Aura Visual Simples vs Complexa",
+        def: "Fosfenos, pontos luminosos ou alucinações de cores estáticas/em movimento (Lobo Occipital - Córtex Estriado) versus alucinações formadas como rostos, cenas ou micropsia/macropsia (Giro Fusiforme / Junção Temporo-Occipital)."
+      },
+      {
+        termo: "Aura Auditiva / Olfativa / Gustativa",
+        def: "Percepção de ruídos/zumbidos (Giro de Heschl / Temporal Superior), odores desagradáveis/cacosmia (Uncus Temporal Medial) ou gosto metálico/azedo (Ínsula / Opercular)."
+      },
+      {
+        termo: "Afasia / Disfasia Ictal",
+        def: "Comprometimento específico da compreensão ou produção da linguagem durante o evento ictal com consciência mantida ou preservada parcialmente, indicando acometimento do hemisfério dominante (Wernicke/Broca)."
+      },
+      {
+        termo: "Nível de Consciência (ILAE 2025)",
+        def: "Substitui os termos simplificados do passado. Avaliado formalmente pelo binômio Percepção (awareness do eu e do ambiente durante o evento) + Reatividade (capacidade de responder a estímulos e ordens de forma coordenada)."
+      },
+      {
+        termo: "Hipsarritmia",
+        def: "Padrão eletroencefalográfico caracterizado por desorganização caótica contínua da atividade de fundo, com ondas lentas de elevadíssima voltagem e surtos de pontas e polipontas multifocais assíncronas, clássico da Síndrome de West."
+      },
+      {
+        termo: "Surtos de Atividade Rápida Paroxística (GPFA)",
+        def: "Surtos rápidos generalizados (10 a 25 Hz) de alta voltagem durante o sono, marcador neurofisiológico característico das crises tônicas na Síndrome de Lennox-Gastaut."
+      },
+      {
+        termo: "Ponta-Onda Contínua no Sono (SWAS / CSWS)",
+        def: "Ativação acentuada e quase contínua de complexos ponta-onda lentos ocupando > 50-85% do sono NREM, associada a regressão neurocognitiva ou comportamental na infância."
+      },
+      {
+        termo: "Parésia de Todd",
+        def: "Déficit motor focal pós-ictal temporário (ex: hemiparesia de um membro ou lado do corpo) durando minutos a poucas horas após crise motora focal, indicando exaustão funcional do córtex motor."
+      },
+      {
+        termo: "Limpeza de Nariz Pós-Ictal (Nose Wiping)",
+        def: "Gesto automático e involuntário de coçar ou limpar o nariz imediatamente após o término da crise, realizado quase invariavelmente pela mão ipsilateral ao lado da zona epileptogênica temporal."
+      },
+      {
+        termo: "Estado de Mal Epiléptico (Status Epilepticus)",
+        def: "Condição resultante do insucesso dos mecanismos de interrupção da crise, caracterizada por crise contínua com duração ≥ 5 min (para tónico-clônica) ou crises recorrentes sem recuperação de consciência entre elas."
+      },
+      {
+        termo: "Crise Não Classificada",
+        def: "Designação oficial da ILAE para eventos epilépticos documentados nos quais a informação disponível é insuficiente para classificar o início ou cujas características não se enquadram nas demais categorias existentes."
+      }
     ];
 
-    // FUNÇÃO PARA TROCA DE ABAS
+    // FUNÇÃO DE MUDANÇA DE ABA
     function mudarAba(abaId) {
-      // Ocultar todas as abas
-      ['classificador', 'sindromes', 'localizacao', 'glossario'].forEach(aba => {
-        const el = document.getElementById(`aba-${aba}`);
-        const nav = document.getElementById(`nav-${aba}`);
+      const abas = ['classificador', 'sindromes', 'localizacao', 'glossario'];
+      abas.forEach(id => {
+        const el = document.getElementById(`aba-${id}`);
+        const nav = document.getElementById(`nav-${id}`);
         if (el) el.classList.add('hidden');
         if (nav) {
           nav.classList.remove('text-indigo-400', 'font-semibold');
-          nav.classList.add('text-slate-400');
+          nav.classList.add('text-slate-400', 'font-medium');
         }
       });
 
-      // Mostrar aba ativa
-      const elAtiva = document.getElementById(`aba-${abaId}`);
+      const abaAtiva = document.getElementById(`aba-${abaId}`);
       const navAtivo = document.getElementById(`nav-${abaId}`);
-      if (elAtiva) elAtiva.classList.remove('hidden');
+      if (abaAtiva) abaAtiva.classList.remove('hidden');
       if (navAtivo) {
         navAtivo.classList.add('text-indigo-400', 'font-semibold');
-        navAtivo.classList.remove('text-slate-400');
+        navAtivo.classList.remove('text-slate-400', 'font-medium');
       }
     }
     window.mudarAba = mudarAba;
 
-    // AÇÕES DE SELEÇÃO NO CLASSIFICADOR
-    function setInicio(valor) {
-      estadoCrise.inicio = valor;
+    // SELEÇÃO DE INÍCIO
+    function setInicio(tipo) {
+      estadoCrise.inicio = tipo;
       atualizarInterfaceClassificador();
     }
     window.setInicio = setInicio;
 
-    function setConsciencia(valor) {
-      estadoCrise.consciencia = valor;
+    // SELEÇÃO DE CONSCIÊNCIA
+    function setConsciencia(tipo) {
+      estadoCrise.consciencia = tipo;
       atualizarInterfaceClassificador();
     }
     window.setConsciencia = setConsciencia;
 
+    // ALTERNAR CATEGORIA DE MANIFESTAÇÃO (Observável / Não Observável)
     function setCategoriaManifestacao(cat) {
       estadoCrise.categoriaManifestacao = cat;
       const tabObs = document.getElementById('tab-cat-observavel');
       const tabNaoObs = document.getElementById('tab-cat-nao_observavel');
 
       if (cat === 'observavel') {
-        tabObs.className = "flex-1 py-1.5 text-xs font-medium rounded-lg text-white bg-indigo-600 transition shadow";
-        tabNaoObs.className = "flex-1 py-1.5 text-xs font-medium rounded-lg text-slate-400 hover:text-white transition";
+        if (tabObs) tabObs.className = "flex-1 py-1.5 text-xs font-medium rounded-lg text-white bg-indigo-600 transition shadow";
+        if (tabNaoObs) tabNaoObs.className = "flex-1 py-1.5 text-xs font-medium rounded-lg text-slate-400 hover:text-white transition";
       } else {
-        tabNaoObs.className = "flex-1 py-1.5 text-xs font-medium rounded-lg text-white bg-indigo-600 transition shadow";
-        tabObs.className = "flex-1 py-1.5 text-xs font-medium rounded-lg text-slate-400 hover:text-white transition";
+        if (tabObs) tabObs.className = "flex-1 py-1.5 text-xs font-medium rounded-lg text-slate-400 hover:text-white transition";
+        if (tabNaoObs) tabNaoObs.className = "flex-1 py-1.5 text-xs font-medium rounded-lg text-white bg-indigo-600 transition shadow";
       }
       renderizarManifestacoes();
     }
     window.setCategoriaManifestacao = setCategoriaManifestacao;
 
+    // TOGGLE SELEÇÃO DE SINTOMA
     function toggleManifestacao(id) {
-      const index = estadoCrise.manifestacoes.indexOf(id);
-      if (index > -1) {
-        estadoCrise.manifestacoes.splice(index, 1);
+      const idx = estadoCrise.manifestacoes.indexOf(id);
+      if (idx > -1) {
+        estadoCrise.manifestacoes.splice(idx, 1);
       } else {
         estadoCrise.manifestacoes.push(id);
       }
@@ -538,12 +721,14 @@
     }
     window.toggleManifestacao = toggleManifestacao;
 
+    // ATUALIZAR DESCRIÇÃO TEXTUAL
     function atualizarDescricaoTextual(val) {
       estadoCrise.descricaoTextual = val;
       atualizarInterfaceClassificador();
     }
     window.atualizarDescricaoTextual = atualizarDescricaoTextual;
 
+    // RESETAR CLASSIFICADOR
     function resetarClassificador() {
       estadoCrise = {
         inicio: null,
@@ -552,24 +737,41 @@
         manifestacoes: [],
         descricaoTextual: ''
       };
-      const inputDesc = document.getElementById('descricaoTextual');
-      if (inputDesc) inputDesc.value = '';
+      const descInput = document.getElementById('descricaoTextual');
+      if (descInput) descInput.value = '';
+      const buscaInput = document.getElementById('buscaSintoma');
+      if (buscaInput) buscaInput.value = '';
       atualizarInterfaceClassificador();
     }
     window.resetarClassificador = resetarClassificador;
 
-    // RENDERIZAR CHIPS DE MANIFESTAÇÃO
+    // RENDERIZAR CHIPS DE MANIFESTAÇÃO COM FILTRAGEM MÓVEL
     function renderizarManifestacoes() {
       const container = document.getElementById('container-manifestacoes');
+      const busca = (document.getElementById('buscaSintoma')?.value || '').toLowerCase();
+      const countBadge = document.getElementById('sintomas-count-badge');
       if (!container) return;
 
+      if (countBadge) {
+        countBadge.innerText = `${estadoCrise.manifestacoes.length} sel.`;
+      }
+
       const lista = manifestacoesDB[estadoCrise.categoriaManifestacao] || [];
-      container.innerHTML = lista.map(item => {
+      const filtrados = lista.filter(item => 
+        item.nome.toLowerCase().includes(busca) || item.lobo.toLowerCase().includes(busca)
+      );
+
+      if (filtrados.length === 0) {
+        container.innerHTML = `<div class="w-full text-center p-4 text-slate-500 text-xs">Nenhum sintoma encontrado para "${busca}".</div>`;
+        return;
+      }
+
+      container.innerHTML = filtrados.map(item => {
         const selecionado = estadoCrise.manifestacoes.includes(item.id);
         return `
           <button onclick="toggleManifestacao('${item.id}')" class="px-2.5 py-1.5 rounded-xl border text-xs font-medium transition active:scale-95 flex items-center gap-1.5 ${
             selecionado 
-            ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm' 
+            ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm font-semibold' 
             : 'bg-slate-900 text-slate-300 border-slate-700/80 hover:border-slate-500'
           }">
             <i class="fa-solid ${item.icone} text-[11px] ${selecionado ? 'text-white' : 'text-indigo-400'}"></i>
@@ -584,24 +786,34 @@
       const texto = (estadoCrise.descricaoTextual || '').toLowerCase();
       const selecionados = estadoCrise.manifestacoes;
 
-      let pontos = { temporal: 0, frontal: 0, parietal: 0, occipital: 0, insula: 0 };
+      let pontos = { temporal: 0, frontal: 0, parietal: 0, occipital: 0, insula: 0, generalizado: 0 };
       let justificativa = [];
 
-      // Mapeamento por chips
+      // Mapeamento exaustivo por chips selecionados
       if (selecionados.includes('aura_epigastrica')) { pontos.temporal += 3; pontos.insula += 2; justificativa.push('Aura epigástrica ascendente'); }
-      if (selecionados.includes('automatismos')) { pontos.temporal += 2; pontos.frontal += 2; justificativa.push('Automatismos oromanuais'); }
-      if (selecionados.includes('versiva')) { pontos.frontal += 4; justificativa.push('Versão cefálica (FEF contralateral)'); }
-      if (selecionados.includes('hipercinetica')) { pontos.frontal += 4; justificativa.push('Atividade motora hipercinética'); }
-      if (selecionados.includes('aura_visual')) { pontos.occipital += 4; justificativa.push('Sintomas visuais/fosfenos'); }
+      if (selecionados.includes('automatismos_oromanuais')) { pontos.temporal += 4; justificativa.push('Automatismos oromanuais'); }
+      if (selecionados.includes('automatismos_gestuais')) { pontos.temporal += 2; pontos.frontal += 2; justificativa.push('Automatismos gestuais'); }
+      if (selecionados.includes('distonia_unilateral')) { pontos.temporal += 3; pontos.frontal += 2; justificativa.push('Postura distônica unilateral'); }
+      if (selecionados.includes('versiva')) { pontos.frontal += 4; justificativa.push('Versão cefálica/ocular forçada'); }
+      if (selecionados.includes('postura_fencistica')) { pontos.frontal += 4; justificativa.push('Postura em esgrima (SMA)'); }
+      if (selecionados.includes('hipercinetica')) { pontos.frontal += 4; justificativa.push('Crise motora hipercinética'); }
+      if (selecionados.includes('aura_visual_simples')) { pontos.occipital += 4; justificativa.push('Fosfenos visuais simples'); }
+      if (selecionados.includes('aura_visual_complexa')) { pontos.occipital += 2; pontos.temporal += 3; justificativa.push('Alucinações visuais formadas'); }
       if (selecionados.includes('aura_sensorial')) { pontos.parietal += 4; justificativa.push('Parestesias somatossensoriais'); }
-      if (selecionados.includes('aura_emocional')) { pontos.temporal += 3; justificativa.push('Aura de medo/ansiedade súbita'); }
+      if (selecionados.includes('aura_dolorosa') || selecionados.includes('aura_termica')) { pontos.parietal += 3; pontos.insula += 2; justificativa.push('Aura térmica/dolorosa'); }
+      if (selecionados.includes('aura_emocional')) { pontos.temporal += 3; justificativa.push('Aura de medo/pânico iminente'); }
+      if (selecionados.includes('aura_gustativa') || selecionados.includes('sialorreia')) { pontos.insula += 4; justificativa.push('Sintomas gustativos/operculares'); }
+      if (selecionados.includes('aura_olfativa')) { pontos.temporal += 4; justificativa.push('Cacosmia/Uncus temporal'); }
+      if (selecionados.includes('aura_auditiva')) { pontos.temporal += 4; justificativa.push('Aura auditiva (Giro de Heschl)'); }
+      if (selecionados.includes('mioclonia_palpebral')) { pontos.generalizado += 4; justificativa.push('Mioclonia palpebral'); }
 
-      // Mapeamento por texto
-      if (texto.includes('deja') || texto.includes('déjà')) { pontos.temporal += 3; justificativa.push('Fenômeno Déjà-vu'); }
-      if (texto.includes('pedalagem') || texto.includes('pelvina')) { pontos.frontal += 3; justificativa.push('Automatismo hipercinético'); }
-      if (texto.includes('gosto') || texto.includes('metal')) { pontos.insula += 3; justificativa.push('Aura gustativa'); }
+      // Mapeamento suplementar por análise do texto livre
+      if (texto.includes('deja') || texto.includes('déjà')) { pontos.temporal += 3; justificativa.push('Relato de Déjà-vu'); }
+      if (texto.includes('pedalagem') || texto.includes('pelvina')) { pontos.frontal += 3; justificativa.push('Relato de pedalagem/balanço pélvico'); }
+      if (texto.includes('gosto') || texto.includes('metal')) { pontos.insula += 3; justificativa.push('Relato de gosto metálico'); }
+      if (texto.includes('esgrima')) { pontos.frontal += 3; justificativa.push('Relato de postura fencística'); }
 
-      // Encontrar maior pontuação
+      // Encontrar maior pontuação neuroanatômica
       let loboMaisProvavel = 'Não determinada';
       let maxPontos = 0;
 
@@ -614,10 +826,11 @@
 
       const nomesLobos = {
         temporal: 'Lobo Temporal Medial / Neocortical',
-        frontal: 'Lobo Frontal (Dorsolateral / Ventromedial)',
-        parietal: 'Lobo Parietal (Giro Pós-Central)',
-        occipital: 'Lobo Occipital',
-        insula: 'Ínsula / Opercular'
+        frontal: 'Lobo Frontal (Dorsolateral / SMA / Ventromedial)',
+        parietal: 'Lobo Parietal (Giro Pós-Central / Parietal II)',
+        occipital: 'Lobo Occipital (Córtex Estriado)',
+        insula: 'Ínsula / Opercular (Visceral/Autonômico)',
+        generalizado: 'Redes Córtico-Subcorticais Generalizadas'
       };
 
       if (maxPontos === 0) {
@@ -637,7 +850,6 @@
       texto += `• Início da Crise: ${estadoCrise.inicio ? estadoCrise.inicio.toUpperCase() : 'Não especificado'}\n`;
       texto += `• Consciência: ${estadoCrise.consciencia ? estadoCrise.consciencia.toUpperCase() : 'N/A'}\n`;
 
-      // Nomes dos sintomas
       let nomesSintomas = [];
       [...manifestacoesDB.observavel, ...manifestacoesDB.nao_observavel].forEach(item => {
         if (estadoCrise.manifestacoes.includes(item.id)) {
@@ -688,7 +900,7 @@
       const caixa = document.getElementById('caixa-laudo-prontuario');
       if (caixa) caixa.innerText = gerarTextoLaudo();
 
-      // Atualizar Badge de Sintomas no Botão Flutuante
+      // Atualizar Badge de Sintomas
       const countFab = document.getElementById('count-sintomas-fab');
       if (countFab) countFab.innerText = estadoCrise.manifestacoes.length;
 
@@ -726,7 +938,7 @@
     }
     window.copiarLaudo = copiarLaudo;
 
-    // FUNÇÕES DO MODAL FLUTUANTE DE LAUDO (MOBILE)
+    // MODAL FLUTUANTE DE LAUDO (MOBILE)
     function abrirModalLaudo() {
       const modal = document.getElementById('modalLaudo');
       const textoModal = document.getElementById('textoLaudoModal');
@@ -765,7 +977,6 @@
     window.fecharModalLaudo = fecharModalLaudo;
     window.copiarLaudoModal = copiarLaudoModal;
 
-    // RENDERIZAR SÍNDROMES
     let filtroIdadeAtual = 'todas';
 
     function renderizarSindromes() {
@@ -819,7 +1030,9 @@
       document.querySelectorAll('.btn-idade').forEach(btn => {
         btn.className = "btn-idade px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 font-medium whitespace-nowrap";
       });
-      event.target.className = "btn-idade px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-medium whitespace-nowrap";
+      if (event && event.target) {
+        event.target.className = "btn-idade px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-medium whitespace-nowrap";
+      }
       renderizarSindromes();
     }
     window.filtrarIdadeSindrome = filtrarIdadeSindrome;
@@ -829,7 +1042,7 @@
     }
     window.filtrarSindromes = filtrarSindromes;
 
-    // RENDERIZAR LOCALIZAÇÃO
+    // RENDERIZAR GUIA DE LOCALIZAÇÃO
     function renderizarGuiaLocalizacao() {
       const container = document.getElementById('lista-guia-localizacao');
       if (!container) return;
@@ -837,7 +1050,7 @@
       const guias = [
         { lobo: 'Lobo Temporal Medial', auras: 'Aura epigástrica ascendente, medo súbito, déjà-vu', sinais: 'Parada comportamental, automatismos oromanuais simples, distonia unilateral de membro superior' },
         { lobo: 'Lobo Frontal (Córtex Motor/Supplementary)', auras: 'Aura somatossensorial vagas, sensação elétrica', sinais: 'Crises hipercinéticas (pedalagem), versão cefálica forçada, postura fencística (em esgrima)' },
-        { lobo: 'Lobo Parietal', auras: 'Parestesias, sensações térmicas, dor somática contralateral', sinais: 'Vertigem, illusions de movimento de membros' },
+        { lobo: 'Lobo Parietal', auras: 'Parestesias, sensações térmicas, dor somática contralateral', sinais: 'Vertigem, ilusões de movimento de membros' },
         { lobo: 'Lobo Occipital', auras: 'Fosfenos, luzes coloridas, cegueira transitória ictal', sinais: 'Nistagmo ictal, alucinações visuais formadas' },
         { lobo: 'Ínsula / Opercular', auras: 'Sensação laríngea de constrição, gosto metálico/cacosmia', sinais: 'Sintomas autonômicos precoces e salivação intensa' }
       ];
@@ -854,7 +1067,6 @@
       `).join('');
     }
 
-    // RENDERIZAR GLOSSÁRIO
     function renderizarGlossario() {
       const container = document.getElementById('lista-glossario');
       const busca = (document.getElementById('buscaGlossario')?.value || '').toLowerCase();
