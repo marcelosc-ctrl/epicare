@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>EpiCare ISCAL - Apoio Diagnóstico em Epilepsia (ILAE 2025)</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Inter -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      background-color: #0f172a;
+    }
+    
+    /* Prevenir zoom automático em campos no iOS/Android */
+    input, select, textarea {
+      font-size: 16px !important;
+    }
+
+    /* Animações e transições */
+    .fade-in {
+      animation: fadeIn 0.2s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Estilização da barra de rolagem */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+      border-radius: 4px;
+    }
+
+    .safe-pb {
+      padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex justify-center selection:bg-indigo-500 selection:text-white">
+
+  <!-- CONTAINER PRINCIPAL TIPO APP CELULAR -->
+  <div class="w-full max-w-md bg-slate-900 min-h-screen flex flex-col relative shadow-2xl border-x border-slate-800/80 safe-pb">
+
+    <!-- CABEÇALHO DO APLICATIVO -->
+    <header class="sticky top-0 z-30 bg-indigo-950/95 backdrop-blur-md border-b border-indigo-800/50 text-white p-3.5 shadow-lg">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-md shadow-indigo-900/50 text-white font-bold text-lg">
+            <i class="fa-solid fa-brain"></i>
+          </div>
+          <div>
+            <h1 class="font-bold text-base tracking-tight leading-tight flex items-center gap-1.5">
+              EpiCare ISCAL
+              <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" title="Online Point-of-Care"></span>
+            </h1>
+            <p class="text-[11px] text-indigo-300 font-medium">Apoio Diagnóstico • ILAE 2025</p>
+            <p class="text-[10px] text-indigo-200/90 font-medium">Criado por Dr. Marcelo Simplício Carvalho</p>
+          </div>
+        </div>
+        
+        <button onclick="resetarClassificador()" class="bg-indigo-900/80 hover:bg-indigo-800 text-indigo-200 text-xs px-2.5 py-1.5 rounded-lg border border-indigo-700/60 active:scale-95 transition flex items-center gap-1.5 shadow-sm">
+          <i class="fa-solid fa-rotate-right text-[11px]"></i>
+          <span>Reset</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL (MÓDULOS) -->
+    <main class="flex-1 p-3.5 space-y-4 overflow-y-auto">
+
+      <!-- ================= ABA 1: CLASSIFICADOR ILAE 2025 ================= -->
+      <section id="aba-classificador" class="space-y-4 fade-in">
+        
+        <!-- CARD 1: INÍCIO DA CRISE -->
+        <div class="bg-slate-800/80 rounded-2xl p-3.5 border border-slate-700/60 shadow-sm">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-1 text-[10px] bg-indigo-950 p-1 rounded-full w-4 h-4 text-center"></i> 
+              Início da Crise
+            </span>
+            <span class="text-[10px] bg-slate-700/60 text-slate-300 px-2 py-0.5 rounded-full">ILAE 2025</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="setInicio('focal')" id="btn-inicio-focal" class="btn-opcao p-3 rounded-xl border border-slate-700 bg-slate-800/90 text-left hover:border-indigo-500 active:scale-98 transition flex flex-col">
+              <span class="font-bold text-sm text-slate-100">Focal</span>
+              <span class="text-[11px] text-slate-400 mt-0.5">Rede limitada a um hemisfério</span>
+            </button>
+
+            <button onclick="setInicio('generalizada')" id="btn-inicio-generalizada" class="btn-opcao p-3 rounded-xl border border-slate-700 bg-slate-800/90 text-left hover:border-indigo-500 active:scale-98 transition flex flex-col">
+              <span class="font-bold text-sm text-slate-100">Generalizada</span>
+              <span class="text-[11px] text-slate-400 mt-0.5">Redes de ambos os hemisférios</span>
+            </button>
+
+            <button onclick="setInicio('desconhecida')" id="btn-inicio-desconhecida" class="btn-opcao p-3 rounded-xl border border-slate-700 bg-slate-800/90 text-left hover:border-indigo-500 active:scale-98 transition flex flex-col">
+              <span class="font-bold text-sm text-slate-100">Desconhecida</span>
+              <span class="text-[11px] text-slate-400 mt-0.5">Informação insuficiente</span>
+            </button>
+
+            <button onclick="setInicio('nao_classificada')" id="btn-inicio-nao_classificada" class="btn-opcao p-3 rounded-xl border border-slate-700 bg-slate-800/90 text-left hover:border-indigo-500 active:scale-98 transition flex flex-col">
+              <span class="font-bold text-sm text-slate-100">Não Classificada</span>
+              <span class="text-[11px] text-slate-400 mt-0.5">Atípica / Incomum</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- CARD 2: NÍVEL DE CONSCIÊNCIA -->
+        <div class="bg-slate-800/80 rounded-2xl p-3.5 border border-slate-700/60 shadow-sm">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-2 text-[10px] bg-indigo-950 p-1 rounded-full w-4 h-4 text-center"></i> 
+              Nível de Consciência
+            </span>
+            <span class="text-[10px] text-slate-400">Percepção + Reatividade</span>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2">
+            <button onclick="setConsciencia('preservada')" id="btn-consc-preservada" class="btn-opcao p-2.5 rounded-xl border border-slate-700 bg-slate-800/90 text-center hover:border-indigo-500 active:scale-98 transition">
+              <span class="font-semibold text-xs text-slate-100 block">Preservada</span>
+              <span class="text-[9px] text-emerald-400 mt-0.5 block">Alerta/Percebe</span>
+            </button>
+
+            <button onclick="setConsciencia('comprometida')" id="btn-consc-comprometida" class="btn-opcao p-2.5 rounded-xl border border-slate-700 bg-slate-800/90 text-center hover:border-indigo-500 active:scale-98 transition">
+              <span class="font-semibold text-xs text-slate-100 block">Comprometida</span>
+              <span class="text-[9px] text-amber-400 mt-0.5 block">Alterada</span>
+            </button>
+
+            <button onclick="setConsciencia('nao_aplicavel')" id="btn-consc-nao_aplicavel" class="btn-opcao p-2.5 rounded-xl border border-slate-700 bg-slate-800/90 text-center hover:border-indigo-500 active:scale-98 transition">
+              <span class="font-semibold text-xs text-slate-100 block">N/A</span>
+              <span class="text-[9px] text-slate-400 mt-0.5 block">Gen. / Desconh.</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- CARD 3: MANIFESTAÇÕES DOMINANTES (ILAE 2025) -->
+        <div class="bg-slate-800/80 rounded-2xl p-3.5 border border-slate-700/60 shadow-sm">
+          <div class="flex items-center justify-between mb-2.5">
+            <span class="text-xs font-semibold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-3 text-[10px] bg-indigo-950 p-1 rounded-full w-4 h-4 text-center"></i> 
+              Manifestações Semiológicas
+            </span>
+          </div>
+
+          <!-- Alternador de Categoria de Sinais -->
+          <div class="flex bg-slate-900/90 p-1 rounded-xl mb-3 border border-slate-700/50">
+            <button onclick="setCategoriaManifestacao('observavel')" id="tab-cat-observavel" class="flex-1 py-1.5 text-xs font-medium rounded-lg text-white bg-indigo-600 transition shadow">
+              Observáveis
+            </button>
+            <button onclick="setCategoriaManifestacao('nao_observavel')" id="tab-cat-nao_observavel" class="flex-1 py-1.5 text-xs font-medium rounded-lg text-slate-400 hover:text-white transition">
+              Não Observáveis (Auras)
+            </button>
+          </div>
+
+          <!-- Lista de Seleção de Sintomas (Chips) -->
+          <div id="container-manifestacoes" class="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto p-1">
+            <!-- Injetado via JS -->
+          </div>
+        </div>
+
+        <!-- CARD 4: CRONOLOGIA E HISTÓRIA LIVRE -->
+        <div class="bg-slate-800/80 rounded-2xl p-3.5 border border-slate-700/60 shadow-sm">
+          <label for="descricaoTextual" class="block text-xs font-semibold text-indigo-400 uppercase tracking-wider mb-1.5">
+            <i class="fa-solid fa-clock-rotate-left mr-1"></i> Cronologia & Detalhes do Evento
+          </label>
+          <textarea id="descricaoTextual" oninput="atualizarDescricaoTextual(this.value)" rows="2" placeholder="Ex: Início com aura epigástrica ascendente seguida de parada comportamental, automatismos oromanuais à direita e afasia pós-ictal..." class="w-full bg-slate-900 text-slate-100 text-xs rounded-xl p-2.5 border border-slate-700 focus:border-indigo-500 focus:outline-none resize-none"></textarea>
+        </div>
+
+        <!-- CARD 5: LOCALIZAÇÃO SEMIOLÓGICA AUTOMÁTICA -->
+        <div class="bg-gradient-to-br from-indigo-950/80 to-purple-950/80 rounded-2xl p-3.5 border border-indigo-700/50 shadow-sm">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-xs font-bold text-indigo-300 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-map-pin text-indigo-400"></i> Localização Semiológica Sugerida
+            </span>
+            <span id="probabilidade-badge" class="text-[10px] bg-indigo-900/80 text-indigo-200 px-2 py-0.5 rounded-full border border-indigo-700/50">Calculando...</span>
+          </div>
+
+          <div id="painel-localizacao-sugerida" class="text-xs text-slate-200 font-medium bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+            Selecione ou descreva sintomas para inferir a zona epileptogênica provável.
+          </div>
+        </div>
+
+        <!-- CARD 6: LAUDO E PADRONIZAÇÃO DE PRONTUÁRIO -->
+        <div class="bg-slate-800/90 rounded-2xl p-3.5 border border-slate-700 shadow-md">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-file-medical text-emerald-400"></i> Laudo do Prontuário
+            </span>
+            <button onclick="copiarLaudo()" id="btn-copiar-laudo" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-1.5 rounded-lg active:scale-95 transition flex items-center gap-1 font-semibold shadow">
+              <i class="fa-solid fa-copy"></i>
+              <span>Copiar Texto</span>
+            </button>
+          </div>
+
+          <div id="caixa-laudo-prontuario" class="bg-slate-950 text-slate-300 font-mono text-[11px] p-3 rounded-xl border border-slate-800 whitespace-pre-wrap leading-relaxed select-all">
+            Preencha as etapas acima para gerar a síntese formal da ILAE 2025...
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ================= ABA 2: SÍNDROMES (EPILEPSYDIAGNOSIS.ORG) ================= -->
+      <section id="aba-sindromes" class="space-y-4 hidden fade-in">
+        <div class="bg-slate-800/80 rounded-2xl p-3.5 border border-slate-700/60">
+          <h2 class="text-sm font-bold text-indigo-300 mb-1 flex items-center gap-1.5">
+            <i class="fa-solid fa-layer-group"></i> Diagnostic Assistant (Epilepsydiagnosis.org)
+          </h2>
+          <p class="text-xs text-slate-400 mb-3">Filtre síndromes eletroclínicas por faixa etária de início ou achados de EEG.</p>
+
+          <!-- Busca por texto -->
+          <div class="relative mb-3">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+            <input type="text" id="buscaSindrome" oninput="filtrarSindromes()" placeholder="Buscar por síndrome, EEG ou sintomas..." class="w-full bg-slate-900 text-slate-100 text-xs rounded-xl pl-8 pr-3 py-2 border border-slate-700 focus:border-indigo-500 focus:outline-none">
+          </div>
+
+          <!-- Filtro por idade -->
+          <div class="flex gap-1.5 overflow-x-auto pb-1 text-xs">
+            <button onclick="filtrarIdadeSindrome('todas')" class="btn-idade px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-medium whitespace-nowrap">Todas</button>
+            <button onclick="filtrarIdadeSindrome('neonatal')" class="btn-idade px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 font-medium whitespace-nowrap">Neonatal</button>
+            <button onclick="filtrarIdadeSindrome('lactente')" class="btn-idade px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 font-medium whitespace-nowrap">Lactente</button>
+            <button onclick="filtrarIdadeSindrome('infancia')" class="btn-idade px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 font-medium whitespace-nowrap">Infância</button>
+            <button onclick="filtrarIdadeSindrome('adolescencia')" class="btn-idade px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 font-medium whitespace-nowrap">Adolesc./Adulto</button>
+          </div>
+        </div>
+
+        <!-- Lista de Cards de Síndromes -->
+        <div id="lista-sindromes" class="space-y-3">
+          <!-- Injetado via JS -->
+        </div>
+      </section>
+
+      <!-- ================= ABA 3: LOCALIZAÇÃO & ETIOLOGIA ================= -->
+      <section id="aba-localizacao" class="space-y-4 hidden fade-in">
+        <div class="bg-slate-800/80 rounded-2xl p-3.5 border border-slate-700/60">
+          <h2 class="text-sm font-bold text-indigo-300 mb-1 flex items-center gap-1.5">
+            <i class="fa-solid fa-compass"></i> Guia Semiológico de Localização
+          </h2>
+          <p class="text-xs text-slate-400">Mapeamento anatômico de auras e sinais motores iniciais.</p>
+        </div>
+
+        <div id="lista-guia-localizacao" class="space-y-3">
+          <!-- Injetado via JS -->
+        </div>
+
+        <!-- CHECKLIST ETIOLÓGICO -->
+        <div class="bg-slate-800/80 rounded-2xl p-3.5 border border-slate-700/60 space-y-2">
+          <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-dna"></i> Checklist Etiológico (6 Categorias ILAE)
+          </h3>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
+              <span class="font-bold text-slate-200 block">1. Estrutural</span>
+              <span class="text-[10px] text-slate-400 block mt-0.5">RM 3T (Esclerose mesial, MCE, AVC, Tumor)</span>
+            </div>
+            <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
+              <span class="font-bold text-slate-200 block">2. Genética</span>
+              <span class="text-[10px] text-slate-400 block mt-0.5">Painel de epilepsia, WES, Canalopatias</span>
+            </div>
+            <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
+              <span class="font-bold text-slate-200 block">3. Infecciosa</span>
+              <span class="text-[10px] text-slate-400 block mt-0.5">Neurocisticercose, TBC, HIV, TORCH</span>
+            </div>
+            <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
+              <span class="font-bold text-slate-200 block">4. Metabólica</span>
+              <span class="text-[10px] text-slate-400 block mt-0.5">Eros inatos, Piridoxina, Glut1</span>
+            </div>
+            <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
+              <span class="font-bold text-slate-200 block">5. Imune</span>
+              <span class="text-[10px] text-slate-400 block mt-0.5">Encefalite autoimune (Anti-LGI1, NMDA)</span>
+            </div>
+            <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
+              <span class="font-bold text-slate-200 block">6. Desconhecida</span>
+              <span class="text-[10px] text-slate-400 block mt-0.5">Em investigação eletroclínica</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= ABA 4: GLOSSÁRIO OPERACIONAL ================= -->
+      <section id="aba-glossario" class="space-y-4 hidden fade-in">
+        <div class="bg-slate-800/80 rounded-2xl p-3.5 border border-slate-700/60">
+          <h2 class="text-sm font-bold text-indigo-300 mb-1 flex items-center gap-1.5">
+            <i class="fa-solid fa-book-medical"></i> Glossário Semiológico (ILAE 2025)
+          </h2>
+          <p class="text-xs text-slate-400 mb-2.5">Terminologia operacional oficial para descrição exata.</p>
+
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+            <input type="text" id="buscaGlossario" oninput="filtrarGlossario()" placeholder="Buscar termo semiológico..." class="w-full bg-slate-900 text-slate-100 text-xs rounded-xl pl-8 pr-3 py-2 border border-slate-700 focus:border-indigo-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div id="lista-glossario" class="space-y-2.5">
+          <!-- Injetado via JS -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- BOTÃO FLUTUANTE DE VER LAUDO (MOBILE) -->
+    <div class="fixed bottom-16 right-4 z-40 sm:hidden">
+      <button onclick="abrirModalLaudo()" class="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs px-4 py-3 rounded-full shadow-lg shadow-indigo-900/60 flex items-center gap-2 active:scale-95 transition border border-indigo-400/40">
+        <i class="fa-solid fa-file-lines text-sm"></i>
+        <span>Ver Laudo (<span id="count-sintomas-fab">0</span>)</span>
+      </button>
+    </div>
+
+    <!-- MODAL / DRAWER FLUTUANTE DE LAUDO (MOBILE) -->
+    <div id="modalLaudo" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex flex-col justify-end">
+      <div class="bg-slate-900 border-t border-slate-700 rounded-t-3xl p-4 space-y-3 max-h-[85vh] flex flex-col shadow-2xl">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <h3 class="text-sm font-bold text-indigo-300 flex items-center gap-2">
+            <i class="fa-solid fa-file-medical text-emerald-400"></i> Laudo do Prontuário
+          </h3>
+          <button onclick="fecharModalLaudo()" class="text-slate-400 hover:text-white text-lg p-1">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div id="textoLaudoModal" class="bg-slate-950 text-slate-300 font-mono text-xs p-3 rounded-xl border border-slate-800 whitespace-pre-wrap leading-relaxed overflow-y-auto flex-1 select-all">
+          Generating...
+        </div>
+
+        <div class="flex gap-2">
+          <button onclick="copiarLaudoModal()" id="btnCopiarModal" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs py-3 rounded-xl active:scale-95 transition flex items-center justify-center gap-2 shadow">
+            <i class="fa-solid fa-copy"></i>
+            <span>Copiar para Área de Transferência</span>
+          </button>
+          <button onclick="fecharModalLaudo()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-4 py-3 rounded-xl font-medium">
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BARRA DE NAVEGAÇÃO INFERIOR -->
+    <nav class="fixed bottom-0 max-w-md w-full bg-slate-950/95 backdrop-blur-md border-t border-slate-800/80 z-30 px-2 py-1.5">
+      <div class="flex justify-around items-center">
+        
+        <button onclick="mudarAba('classificador')" id="nav-classificador" class="nav-item flex-1 flex flex-col items-center py-1 text-indigo-400 font-semibold active:scale-95 transition">
+          <i class="fa-solid fa-diagram-project text-base sm:text-lg"></i>
+          <span class="text-[10px] mt-0.5">Crise 2025</span>
+        </button>
+
+        <button onclick="mudarAba('sindromes')" id="nav-sindromes" class="nav-item flex-1 flex flex-col items-center py-1 text-slate-400 hover:text-indigo-400 font-medium active:scale-95 transition">
+          <i class="fa-solid fa-layer-group text-base sm:text-lg"></i>
+          <span class="text-[10px] mt-0.5">Síndromes</span>
+        </button>
+
+        <button onclick="mudarAba('localizacao')" id="nav-localizacao" class="nav-item flex-1 flex flex-col items-center py-1 text-slate-400 hover:text-indigo-400 font-medium active:scale-95 transition">
+          <i class="fa-solid fa-compass text-base sm:text-lg"></i>
+          <span class="text-[10px] mt-0.5">Localização</span>
+        </button>
+
+        <button onclick="mudarAba('glossario')" id="nav-glossario" class="nav-item flex-1 flex flex-col items-center py-1 text-slate-400 hover:text-indigo-400 font-medium active:scale-95 transition">
+          <i class="fa-solid fa-book-medical text-base sm:text-lg"></i>
+          <span class="text-[10px] mt-0.5">Glossário</span>
+        </button>
+
+      </div>
+    </nav>
+
+  </div>
+
+  <script>
+    // ESTADO DA APLICAÇÃO
+    let estadoCrise = {
+      inicio: null,
+      consciencia: null,
+      categoriaManifestacao: 'observavel',
+      manifestacoes: [],
+      descricaoTextual: ''
+    };
+
+    // BANCO DE DADOS DE MANIFESTAÇÕES
+    const manifestacoesDB = {
+      observavel: [
+        { id: 'automatismos', nome: 'Automatismos', lobo: 'Temporal / Frontal', icone: 'fa-hand-sparkles' },
+        { id: 'atonio', nome: 'Atonia / Perda de Tônus', lobo: 'Frontal / Parietal', icone: 'fa-person-falling' },
+        { id: 'clonica', nome: 'Clônica', lobo: 'Frontal (Córtex Motor)', icone: 'fa-wave-square' },
+        { id: 'espasmos', nome: 'Espasmos Epilépticos', lobo: 'Generalizado / Redes Difusas', icone: 'fa-bolt' },
+        { id: 'hipercinetica', nome: 'Hipercinética (Pedalagem/Pelvina)', lobo: 'Frontal Ventromedial', icone: 'fa-person-running' },
+        { id: 'mioclonica', nome: 'Mioclonias Positivas', lobo: 'Córtex Motor / Generalizado', icone: 'fa-bolt-lightning' },
+        { id: 'mioclonia_negativa', nome: 'Mioclonia Negativa Epiléptica', lobo: 'Frontal / Parietal Motor', icone: 'fa-hand-back-fist' },
+        { id: 'tonica', nome: 'Tônica', lobo: 'Frontal / Generalizado', icone: 'fa-child-reaching' },
+        { id: 'versiva', nome: 'Versão Cefálica/Ocular', lobo: 'Frontal Contralateral (FEF)', icone: 'fa-head-side-virus' },
+        { id: 'parada_comportamento', nome: 'Parada Comportamental', lobo: 'Temporal / Frontal', icone: 'fa-pause' },
+        { id: 'autonomica_obs', nome: 'Sinais Autonômicos (Piloereção/Rubor)', lobo: 'Ínsula / Temporal', icone: 'fa-heart-pulse' }
+      ],
+      nao_observavel: [
+        { id: 'aura_epigastrica', nome: 'Aura Epigástrica Ascendente', lobo: 'Temporal Medial / Ínsula', icone: 'fa-arrow-up-short-wide' },
+        { id: 'aura_cognitiva', nome: 'Déjà-vu / Jamais-vu / Disfasia', lobo: 'Temporal Neocortical', icone: 'fa-brain' },
+        { id: 'aura_emocional', nome: 'Medo Iminente / Ansiedade Súbita', lobo: 'Amígda / Temporal Medial', icone: 'fa-face-flushed' },
+        { id: 'aura_sensorial', nome: 'Parestesias / Somatossensorial', lobo: 'Parietal (Giro Pós-Central)', icone: 'fa-hand' },
+        { id: 'aura_visual', nome: 'Fosfenos / Alucinação Visual', lobo: 'Occipital', icone: 'fa-eye' },
+        { id: 'aura_auditiva', nome: 'Zumbido / Alucinação Auditiva', lobo: 'Temporal Superior (Heschl)', icone: 'fa-ear-listen' },
+        { id: 'aura_olfativa_gustativa', nome: 'Cacosmia / Gosto Metálico', lobo: 'Uncus Temporal / Ínsula', icone: 'fa-lemon' },
+        { id: 'aura_tontura', nome: 'Sensação Vertiginosa Epiléptica', lobo: 'Parieto-Temporal', icone: 'fa-arrows-spin' }
+      ]
+    };
+
+    // BANCO DE DADOS DE SÍNDROMES (EPILEPSYDIAGNOSIS.ORG)
+    const sindromesDB = [
+      {
+        id: 'sve',
+        nome: 'Síndrome de West (Espasmos Infantis)',
+        faixa: 'lactente',
+        idade: '3 - 12 meses',
+        clinica: 'Tríade: Espasmos epilépticos em flexão/extensão, atraso no DNPM e EEG característico.',
+        eeg: 'Hipsarritmia (padrão caótico, desorganizado, de alta voltagem com pontas multifocais).',
+        fármacosIndicados: ['Vigabatrina (escolha na Esclerose Tuberosa)', 'ACTH / Corticoides'],
+        fármacosContraindicados: ['Carbamazepina', 'Oxcarbazepina (podem agravar)']
+      },
+      {
+        id: 'lennox',
+        nome: 'Síndrome de Lennox-Gastaut (SLG)',
+        faixa: 'infancia',
+        idade: '2 - 8 anos',
+        clinica: 'Múltiplos tipos de crises (tônicas noturnas, atônicas/drop-attacks, ausências atípicas), prejuízo cognitivo.',
+        eeg: 'Ponta-onda lenta interictal (< 2.5 Hz) difusa e Surtos de Ritmo Rápido Paroxístico Noturno (GPFA).',
+        fármacosIndicados: ['Valproato', 'Clobazam', 'Lamotrigina', 'Rufinamida', 'Cannabidiol'],
+        fármacosContraindicados: ['Carbamazepina', 'Phenitoína (pode piorar ausências e mioclonias)']
+      },
+      {
+        id: 'ausencia_infantil',
+        nome: 'Epilepsia Ausência Infantil (EAI)',
+        faixa: 'infancia',
+        idade: '4 - 10 anos',
+        clinica: 'Ausências típicas frequentes (dezenas por dia), induzidas por hiperventilação. Desenvolvimento normal.',
+        eeg: 'Complexos de ponta-onda quadrada síncrona e simétrica a 3 Hz com início e fim abruptos.',
+        fármacosIndicados: ['Etossuximida (primeira escolha)', 'Valproato de Sódio', 'Lamotrigina'],
+        fármacosContraindicados: ['Carbamazepina', 'Oxcarbazepina', 'Vigabatrina', 'Tiagabina']
+      },
+      {
+        id: 'ejm',
+        nome: 'Epilepsia Mioclônica Juvenil (EMJ - Janz)',
+        faixa: 'adolescencia',
+        idade: '12 - 18 anos',
+        clinica: 'Abalos mioclônicos matinais ao despertar (arremessar objetos), crises tônico-clônicas disparadas por privação de sono/álcool.',
+        eeg: 'Poliponta-onda rápida (4-6 Hz) generalizada com fotoparoxismo.',
+        fármacosIndicados: ['Valproato', 'Levetiracetam', 'Lamotrigina', 'Topiramato'],
+        fármacosContraindicados: ['Carbamazepina', 'Oxcarbazepina', 'Phenitoína (podem exacerbar acentuadamente as mioclonias)']
+      },
+      {
+        id: 'dravet',
+        nome: 'Síndrome de Dravet (SCN1A)',
+        faixa: 'lactente',
+        idade: '< 1 ano (início aos 6 meses)',
+        clinica: 'Crises febris prolongadas/estado de mal febril hemicorporal, mioclonias subsequentes, fotossensibilidade e declínio cognitivo.',
+        eeg: 'Inicialmente normal; mais tarde lentificação multifocal e polipontas.',
+        fármacosIndicados: ['Stiripentol', 'Clobazam', 'Valproato', 'Fenfluramina', 'Dieta Cetogênica'],
+        fármacosContraindicados: ['Bloqueadores de Canal de Sódio (Carbamazepina, Oxcarbazepina, Lamotrigina, Phenitoína)']
+      }
+    ];
+
+    // GLOSSÁRIO ILAE 2025
+    const glossarioDB = [
+      { termo: 'Automatismos', def: 'Atividade motora involuntária, semieficiente ou desordenada, que ocorre durante o comprometimento da consciência (ex: mastigação, mexer nas roupas, marchar).' },
+      { termo: 'Atonia', def: 'Perda súbita e involuntária do tônus muscular pós-postural levando à queda de membros ou do corpo (drop attack).' },
+      { termo: 'Mioclonia Negativa Epiléptica', def: 'Interrupção breve e involuntária da contração muscular ativa, durando < 500ms, causando queda da postura da mão/membro sem evidência de EMG antecedente positiva.' },
+      { termo: 'Versão Cefálica', def: 'Desvio forçado, não natural e sustentado da cabeça e/ou olhos para um dos lados, indicando descarga no Lobo Frontal Contralateral (Campo Ocular Frontal).' },
+      { termo: 'Parada Comportamental', def: 'Cessação abrupta de todas as atividades motoras e imobilidade completa com olhar fixo durante o evento epiléptico.' }
+    ];
+
+    // FUNÇÃO PARA TROCA DE ABAS
+    function mudarAba(abaId) {
+      // Ocultar todas as abas
+      ['classificador', 'sindromes', 'localizacao', 'glossario'].forEach(aba => {
+        const el = document.getElementById(`aba-${aba}`);
+        const nav = document.getElementById(`nav-${aba}`);
+        if (el) el.classList.add('hidden');
+        if (nav) {
+          nav.classList.remove('text-indigo-400', 'font-semibold');
+          nav.classList.add('text-slate-400');
+        }
+      });
+
+      // Mostrar aba ativa
+      const elAtiva = document.getElementById(`aba-${abaId}`);
+      const navAtivo = document.getElementById(`nav-${abaId}`);
+      if (elAtiva) elAtiva.classList.remove('hidden');
+      if (navAtivo) {
+        navAtivo.classList.add('text-indigo-400', 'font-semibold');
+        navAtivo.classList.remove('text-slate-400');
+      }
+    }
+    window.mudarAba = mudarAba;
+
+    // AÇÕES DE SELEÇÃO NO CLASSIFICADOR
+    function setInicio(valor) {
+      estadoCrise.inicio = valor;
+      atualizarInterfaceClassificador();
+    }
+    window.setInicio = setInicio;
+
+    function setConsciencia(valor) {
+      estadoCrise.consciencia = valor;
+      atualizarInterfaceClassificador();
+    }
+    window.setConsciencia = setConsciencia;
+
+    function setCategoriaManifestacao(cat) {
+      estadoCrise.categoriaManifestacao = cat;
+      const tabObs = document.getElementById('tab-cat-observavel');
+      const tabNaoObs = document.getElementById('tab-cat-nao_observavel');
+
+      if (cat === 'observavel') {
+        tabObs.className = "flex-1 py-1.5 text-xs font-medium rounded-lg text-white bg-indigo-600 transition shadow";
+        tabNaoObs.className = "flex-1 py-1.5 text-xs font-medium rounded-lg text-slate-400 hover:text-white transition";
+      } else {
+        tabNaoObs.className = "flex-1 py-1.5 text-xs font-medium rounded-lg text-white bg-indigo-600 transition shadow";
+        tabObs.className = "flex-1 py-1.5 text-xs font-medium rounded-lg text-slate-400 hover:text-white transition";
+      }
+      renderizarManifestacoes();
+    }
+    window.setCategoriaManifestacao = setCategoriaManifestacao;
+
+    function toggleManifestacao(id) {
+      const index = estadoCrise.manifestacoes.indexOf(id);
+      if (index > -1) {
+        estadoCrise.manifestacoes.splice(index, 1);
+      } else {
+        estadoCrise.manifestacoes.push(id);
+      }
+      atualizarInterfaceClassificador();
+    }
+    window.toggleManifestacao = toggleManifestacao;
+
+    function atualizarDescricaoTextual(val) {
+      estadoCrise.descricaoTextual = val;
+      atualizarInterfaceClassificador();
+    }
+    window.atualizarDescricaoTextual = atualizarDescricaoTextual;
+
+    function resetarClassificador() {
+      estadoCrise = {
+        inicio: null,
+        consciencia: null,
+        categoriaManifestacao: 'observavel',
+        manifestacoes: [],
+        descricaoTextual: ''
+      };
+      const inputDesc = document.getElementById('descricaoTextual');
+      if (inputDesc) inputDesc.value = '';
+      atualizarInterfaceClassificador();
+    }
+    window.resetarClassificador = resetarClassificador;
+
+    // RENDERIZAR CHIPS DE MANIFESTAÇÃO
+    function renderizarManifestacoes() {
+      const container = document.getElementById('container-manifestacoes');
+      if (!container) return;
+
+      const lista = manifestacoesDB[estadoCrise.categoriaManifestacao] || [];
+      container.innerHTML = lista.map(item => {
+        const selecionado = estadoCrise.manifestacoes.includes(item.id);
+        return `
+          <button onclick="toggleManifestacao('${item.id}')" class="px-2.5 py-1.5 rounded-xl border text-xs font-medium transition active:scale-95 flex items-center gap-1.5 ${
+            selecionado 
+            ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm' 
+            : 'bg-slate-900 text-slate-300 border-slate-700/80 hover:border-slate-500'
+          }">
+            <i class="fa-solid ${item.icone} text-[11px] ${selecionado ? 'text-white' : 'text-indigo-400'}"></i>
+            <span>${item.nome}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    // LOCALIZAÇÃO SEMIOLÓGICA AUTOMÁTICA
+    function calcularLocalizacaoAutomatica() {
+      const texto = (estadoCrise.descricaoTextual || '').toLowerCase();
+      const selecionados = estadoCrise.manifestacoes;
+
+      let pontos = { temporal: 0, frontal: 0, parietal: 0, occipital: 0, insula: 0 };
+      let justificativa = [];
+
+      // Mapeamento por chips
+      if (selecionados.includes('aura_epigastrica')) { pontos.temporal += 3; pontos.insula += 2; justificativa.push('Aura epigástrica ascendente'); }
+      if (selecionados.includes('automatismos')) { pontos.temporal += 2; pontos.frontal += 2; justificativa.push('Automatismos oromanuais'); }
+      if (selecionados.includes('versiva')) { pontos.frontal += 4; justificativa.push('Versão cefálica (FEF contralateral)'); }
+      if (selecionados.includes('hipercinetica')) { pontos.frontal += 4; justificativa.push('Atividade motora hipercinética'); }
+      if (selecionados.includes('aura_visual')) { pontos.occipital += 4; justificativa.push('Sintomas visuais/fosfenos'); }
+      if (selecionados.includes('aura_sensorial')) { pontos.parietal += 4; justificativa.push('Parestesias somatossensoriais'); }
+      if (selecionados.includes('aura_emocional')) { pontos.temporal += 3; justificativa.push('Aura de medo/ansiedade súbita'); }
+
+      // Mapeamento por texto
+      if (texto.includes('deja') || texto.includes('déjà')) { pontos.temporal += 3; justificativa.push('Fenômeno Déjà-vu'); }
+      if (texto.includes('pedalagem') || texto.includes('pelvina')) { pontos.frontal += 3; justificativa.push('Automatismo hipercinético'); }
+      if (texto.includes('gosto') || texto.includes('metal')) { pontos.insula += 3; justificativa.push('Aura gustativa'); }
+
+      // Encontrar maior pontuação
+      let loboMaisProvavel = 'Não determinada';
+      let maxPontos = 0;
+
+      for (let lobo in pontos) {
+        if (pontos[lobo] > maxPontos) {
+          maxPontos = pontos[lobo];
+          loboMaisProvavel = lobo;
+        }
+      }
+
+      const nomesLobos = {
+        temporal: 'Lobo Temporal Medial / Neocortical',
+        frontal: 'Lobo Frontal (Dorsolateral / Ventromedial)',
+        parietal: 'Lobo Parietal (Giro Pós-Central)',
+        occipital: 'Lobo Occipital',
+        insula: 'Ínsula / Opercular'
+      };
+
+      if (maxPontos === 0) {
+        return { lobo: 'Indeterminada no momento', justificativa: 'Aguardando marcadores semiológicos suficientes.' };
+      }
+
+      return {
+        lobo: nomesLobos[loboMaisProvavel] || 'Indeterminada',
+        justificativa: justificativa.join(', ') || 'Baseada nos achados clínicos agrupados.'
+      };
+    }
+
+    // GERAR LAUDO COMPLETO
+    function gerarTextoLaudo() {
+      let texto = `LAUDO ELETROCLÍNICO - CLASSIFICAÇÃO ILAE 2025\n`;
+      texto += `--------------------------------------------------\n`;
+      texto += `• Início da Crise: ${estadoCrise.inicio ? estadoCrise.inicio.toUpperCase() : 'Não especificado'}\n`;
+      texto += `• Consciência: ${estadoCrise.consciencia ? estadoCrise.consciencia.toUpperCase() : 'N/A'}\n`;
+
+      // Nomes dos sintomas
+      let nomesSintomas = [];
+      [...manifestacoesDB.observavel, ...manifestacoesDB.nao_observavel].forEach(item => {
+        if (estadoCrise.manifestacoes.includes(item.id)) {
+          nomesSintomas.push(item.nome);
+        }
+      });
+
+      texto += `• Manifestações: ${nomesSintomas.length > 0 ? nomesSintomas.join(', ') : 'Nenhuma selecionada'}\n`;
+      if (estadoCrise.descricaoTextual) {
+        texto += `• Cronologia/Detalhes: ${estadoCrise.descricaoTextual}\n`;
+      }
+
+      const loc = calcularLocalizacaoAutomatica();
+      texto += `• Localização Semiológica Sugerida: ${loc.lobo} (${loc.justificativa})\n`;
+      texto += `\n(Laudo gerado via EpiCare ISCAL • Criado por Dr. Marcelo Simplício Carvalho)`;
+
+      return texto;
+    }
+
+    function atualizarInterfaceClassificador() {
+      // Destacar botões de Início
+      ['focal', 'generalizada', 'desconhecida', 'nao_classificada'].forEach(tipo => {
+        const btn = document.getElementById(`btn-inicio-${tipo}`);
+        if (btn) {
+          if (estadoCrise.inicio === tipo) {
+            btn.className = "btn-opcao p-3 rounded-xl border-2 border-indigo-500 bg-indigo-950/80 text-left transition shadow-md";
+          } else {
+            btn.className = "btn-opcao p-3 rounded-xl border border-slate-700 bg-slate-800/90 text-left hover:border-indigo-500 transition";
+          }
+        }
+      });
+
+      // Destacar botões de Consciência
+      ['preservada', 'comprometida', 'nao_aplicavel'].forEach(tipo => {
+        const btn = document.getElementById(`btn-consc-${tipo}`);
+        if (btn) {
+          if (estadoCrise.consciencia === tipo) {
+            btn.className = "btn-opcao p-2.5 rounded-xl border-2 border-indigo-500 bg-indigo-950/80 text-center transition shadow-md";
+          } else {
+            btn.className = "btn-opcao p-2.5 rounded-xl border border-slate-700 bg-slate-800/90 text-center hover:border-indigo-500 transition";
+          }
+        }
+      });
+
+      renderizarManifestacoes();
+
+      // Atualizar Laudo
+      const caixa = document.getElementById('caixa-laudo-prontuario');
+      if (caixa) caixa.innerText = gerarTextoLaudo();
+
+      // Atualizar Badge de Sintomas no Botão Flutuante
+      const countFab = document.getElementById('count-sintomas-fab');
+      if (countFab) countFab.innerText = estadoCrise.manifestacoes.length;
+
+      // Atualizar Localização
+      const loc = calcularLocalizacaoAutomatica();
+      const painelLoc = document.getElementById('painel-localizacao-sugerida');
+      if (painelLoc) {
+        painelLoc.innerHTML = `
+          <div class="font-bold text-indigo-300">${loc.lobo}</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">${loc.justificativa}</div>
+        `;
+      }
+    }
+
+    // COPIAR LAUDO
+    function copiarLaudo() {
+      const texto = gerarTextoLaudo();
+      const aux = document.createElement('textarea');
+      aux.value = texto;
+      document.body.appendChild(aux);
+      aux.select();
+      try {
+        document.execCommand('copy');
+        const btn = document.getElementById('btn-copiar-laudo');
+        if (btn) {
+          btn.innerHTML = `<i class="fa-solid fa-check"></i><span>Copiado!</span>`;
+          setTimeout(() => {
+            btn.innerHTML = `<i class="fa-solid fa-copy"></i><span>Copiar Texto</span>`;
+          }, 2000);
+        }
+      } catch (err) {
+        console.error('Erro ao copiar:', err);
+      }
+      document.body.removeChild(aux);
+    }
+    window.copiarLaudo = copiarLaudo;
+
+    // FUNÇÕES DO MODAL FLUTUANTE DE LAUDO (MOBILE)
+    function abrirModalLaudo() {
+      const modal = document.getElementById('modalLaudo');
+      const textoModal = document.getElementById('textoLaudoModal');
+      if (textoModal) textoModal.innerText = gerarTextoLaudo();
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function fecharModalLaudo() {
+      const modal = document.getElementById('modalLaudo');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function copiarLaudoModal() {
+      const textoModal = document.getElementById('textoLaudoModal');
+      if (!textoModal) return;
+      
+      const aux = document.createElement('textarea');
+      aux.value = textoModal.innerText;
+      document.body.appendChild(aux);
+      aux.select();
+      try {
+        document.execCommand('copy');
+        const btn = document.getElementById('btnCopiarModal');
+        if (btn) {
+          const original = btn.innerText;
+          btn.innerText = 'Copiado!';
+          setTimeout(() => btn.innerText = original, 2000);
+        }
+      } catch (err) {
+        console.error('Erro ao copiar:', err);
+      }
+      document.body.removeChild(aux);
+    }
+
+    window.abrirModalLaudo = abrirModalLaudo;
+    window.fecharModalLaudo = fecharModalLaudo;
+    window.copiarLaudoModal = copiarLaudoModal;
+
+    // RENDERIZAR SÍNDROMES
+    let filtroIdadeAtual = 'todas';
+
+    function renderizarSindromes() {
+      const container = document.getElementById('lista-sindromes');
+      const busca = (document.getElementById('buscaSindrome')?.value || '').toLowerCase();
+      if (!container) return;
+
+      const filtradas = sindromesDB.filter(s => {
+        const bateIdade = filtroIdadeAtual === 'todas' || s.faixa === filtroIdadeAtual;
+        const bateTexto = s.nome.toLowerCase().includes(busca) || 
+                          s.clinica.toLowerCase().includes(busca) || 
+                          s.eeg.toLowerCase().includes(busca);
+        return bateIdade && bateTexto;
+      });
+
+      if (filtradas.length === 0) {
+        container.innerHTML = `<div class="text-center p-6 text-slate-500 text-xs">Nenhuma síndrome encontrada com estes critérios.</div>`;
+        return;
+      }
+
+      container.innerHTML = filtradas.map(s => `
+        <div class="bg-slate-800/90 rounded-2xl p-3.5 border border-slate-700/80 shadow-sm space-y-2">
+          <div class="flex items-center justify-between border-b border-slate-700/60 pb-2">
+            <h3 class="font-bold text-xs text-indigo-300">${s.nome}</h3>
+            <span class="text-[10px] bg-indigo-950 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-800/50">${s.idade}</span>
+          </div>
+
+          <p class="text-xs text-slate-300">${s.clinica}</p>
+
+          <div class="bg-slate-900/80 p-2 rounded-xl text-xs text-slate-400 border border-slate-800">
+            <strong class="text-indigo-400 font-medium">EEG:</strong> ${s.eeg}
+          </div>
+
+          <div class="grid grid-cols-1 gap-1.5 pt-1 text-[11px]">
+            <div class="bg-emerald-950/40 border border-emerald-800/40 p-2 rounded-xl text-emerald-300">
+              <i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i>
+              <strong>Indicados:</strong> ${s.fármacosIndicados.join(', ')}
+            </div>
+
+            <div class="bg-rose-950/40 border border-rose-800/40 p-2 rounded-xl text-rose-300">
+              <i class="fa-solid fa-triangle-exclamation text-rose-400 mr-1"></i>
+              <strong>Contraindicados:</strong> ${s.fármacosContraindicados.join(', ')}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filtrarIdadeSindrome(faixa) {
+      filtroIdadeAtual = faixa;
+      document.querySelectorAll('.btn-idade').forEach(btn => {
+        btn.className = "btn-idade px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 font-medium whitespace-nowrap";
+      });
+      event.target.className = "btn-idade px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-medium whitespace-nowrap";
+      renderizarSindromes();
+    }
+    window.filtrarIdadeSindrome = filtrarIdadeSindrome;
+
+    function filtrarSindromes() {
+      renderizarSindromes();
+    }
+    window.filtrarSindromes = filtrarSindromes;
+
+    // RENDERIZAR LOCALIZAÇÃO
+    function renderizarGuiaLocalizacao() {
+      const container = document.getElementById('lista-guia-localizacao');
+      if (!container) return;
+
+      const guias = [
+        { lobo: 'Lobo Temporal Medial', auras: 'Aura epigástrica ascendente, medo súbito, déjà-vu', sinais: 'Parada comportamental, automatismos oromanuais simples, distonia unilateral de membro superior' },
+        { lobo: 'Lobo Frontal (Córtex Motor/Supplementary)', auras: 'Aura somatossensorial vagas, sensação elétrica', sinais: 'Crises hipercinéticas (pedalagem), versão cefálica forçada, postura fencística (em esgrima)' },
+        { lobo: 'Lobo Parietal', auras: 'Parestesias, sensações térmicas, dor somática contralateral', sinais: 'Vertigem, illusions de movimento de membros' },
+        { lobo: 'Lobo Occipital', auras: 'Fosfenos, luzes coloridas, cegueira transitória ictal', sinais: 'Nistagmo ictal, alucinações visuais formadas' },
+        { lobo: 'Ínsula / Opercular', auras: 'Sensação laríngea de constrição, gosto metálico/cacosmia', sinais: 'Sintomas autonômicos precoces e salivação intensa' }
+      ];
+
+      container.innerHTML = guias.map(g => `
+        <div class="bg-slate-800/80 p-3 rounded-2xl border border-slate-700/60 text-xs space-y-1">
+          <div class="font-bold text-indigo-300 text-xs flex items-center justify-between">
+            <span>${g.lobo}</span>
+            <i class="fa-solid fa-brain text-slate-500 text-xs"></i>
+          </div>
+          <p class="text-slate-300"><strong class="text-indigo-400 font-medium">Auras:</strong> ${g.auras}</p>
+          <p class="text-slate-400"><strong class="text-slate-300 font-medium">Sinais Motores/Observáveis:</strong> ${g.sinais}</p>
+        </div>
+      `).join('');
+    }
+
+    // RENDERIZAR GLOSSÁRIO
+    function renderizarGlossario() {
+      const container = document.getElementById('lista-glossario');
+      const busca = (document.getElementById('buscaGlossario')?.value || '').toLowerCase();
+      if (!container) return;
+
+      const filtrados = glossarioDB.filter(g => g.termo.toLowerCase().includes(busca) || g.def.toLowerCase().includes(busca));
+
+      container.innerHTML = filtrados.map(g => `
+        <div class="bg-slate-800/80 p-3 rounded-2xl border border-slate-700/60 text-xs">
+          <span class="font-bold text-indigo-300 block mb-0.5">${g.termo}</span>
+          <p class="text-slate-300 leading-relaxed">${g.def}</p>
+        </div>
+      `).join('');
+    }
+
+    function filtrarGlossario() {
+      renderizarGlossario();
+    }
+    window.filtrarGlossario = filtrarGlossario;
+
+    // INICIALIZAÇÃO NO CARREGAMENTO DA PÁGINA
+    window.onload = function() {
+      atualizarInterfaceClassificador();
+      renderizarSindromes();
+      renderizarGuiaLocalizacao();
+      renderizarGlossario();
+    };
+  </script>
+</body>
+</html>
